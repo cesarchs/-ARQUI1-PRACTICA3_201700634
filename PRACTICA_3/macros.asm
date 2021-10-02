@@ -1,3 +1,4 @@
+
 print macro buffer ;imprime cadena
 push ax
 push dx

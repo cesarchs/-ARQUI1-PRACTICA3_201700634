@@ -1,5 +1,5 @@
 include macros.asm ;archivo con los macros a utilizar
-
+include archivos.asm ; incluimos macros para manipulacion de archivos 
 ImprimirTablero macro vector 
 LOCAL Mientras, FinMientras, ImprimirSalto
 push si
@@ -152,7 +152,45 @@ mov valor,al ; valor = al
 
 
 endm
+;-----------------------------------------------------------------------------------------------------------------------------------
+AnalizarRepo macro txtrepo
+;print txtrepo[0]
+LOCAL exi,letra2, letra3, exito
+mov al,txtrepo[0]
+mov repaux, al
+print repaux
+cmp repaux, 114 ; r
+JE letra2
+jmp exi 
+letra2:
+mov al,txtrepo[1]
+mov repaux, al
+print repaux
+cmp repaux, 101 ; e
+JE exito
+;desde aca mandamos a la etiqueta exito, por alguna razon no llega bien el valor de la p  
+jmp exi 
+letra3:
+xor ax,ax
+mov al,txtrepo[2]
+mov repaux, al
+print repaux
+cmp repaux,112 ; p 
+JE exito
+print alert
+jmp exi 
+exito:
+print salto
 
+call CrearHtml
+print reporte
+print salto
+;salirr:
+;print reporte2
+
+exi:
+endm
+;----------------------------------------------------------------------------------------------------------------------------------------
 
 .model small
 
@@ -168,7 +206,9 @@ endm
 msjEntrada db 0ah, 0dh, 'Universidad de San Carlos de Guatemala',0ah, 0dh,'Arquitectura de Ensambladores y Computadores 1' , 0ah, 0dh, 'CESAR LEONEL CHAMALE SICAN      201700634' , 0ah, 0dh, 'Practica 3',0ah, 0dh, 'Inrese x si desea cerrar el programa' , '$'
 jp1 db 0ah, 0dh, 'Jugador 1 ingrese su nombre:', '$'
 jp2 db 0ah, 0dh, 'Jugador 2 ingrese su nombre:', '$'
-msjRepo db 0ah, 0dh, 'Ingrese rep para generar reporte', '$'
+reporte db 0ah, 0dh, 'generando reportes ', '$'
+alert db 0ah, 0dh, 'llego despues de je ', '$'
+msjRepo db 0ah, 0dh, 'Ingrese rep para generar reporte: ', '$'
 msjTurno db 0ah, 0dh, 'Turno del jugador:', '$'
 finJuego db 0ah, 0dh, 'Ingrese x para finalizar el juego', '$'
 juegaB db 0ah, 0dh, 'Juega blancas', '$'
@@ -178,35 +218,114 @@ punteo db 0ah, 0dh, 'Punteo actual:', '$'
 salto db 0ah,0dh, '$' ,'$'
 nombre1 db 10 dup('$'), '$'
 nombre2 db 10 dup('$'), '$'
-
-
 posicionInicial db 2 dup('$'), '$'
 posicionFinal db 2 dup('$'), '$'
-
 valorInicial db 0, '$' 
 valorFinal db 0, '$' 
-
 aux db 0, '$' 
 columna db 0, '$'
-
 repo db 0, '$'
-
+repaux db 0, '$'
+auxPunteo1 db 0, '0'
+auxPunteo2 db 0, '0'
 resultado db 0, '$'
 tablero db 82 dup('$'), '$'
 numero db 2 dup('$'), '$'
 comando db 5 dup('$'), '$' ; A1:B2
-
 fila db 0, '$'
 
+iniHtml db "<html><body>"
+finHtml db "</body></html>"
+
+htmlh1o db "<h1>"
+htmlh1c db "</h1>"
+htmlh2o db "<h2>"
+htmlh2c db "</h2>"
+htmlSalto db "<br/>"
+; -----------para html de jugador 1-----------------
+htmlJugador1 db "nombre Jugador 1: "
+htmlPunteo1 db "punteo jugador 1: "
+; -----------para html de jugador 2 ----------------
+htmlJugador2 db "nombre Jugador 2: "
+htmlPunteo2 db "punteo jugador 2: "
+;---------------TABLERO -------------------------
+htmlTablero db "TABLERO DE JUEGO ACTUAL: "
+
+htmlrepo db "REPORTE DE JUEGO DE DAMAS: "
+
+   ;=======Archivos=====
+input db "REPORTE.htm",00h;Nombre
+contenedor db 200 dup("$"),"$";Guardar Lectyra
+handle dw ?
 
 
 
-;----------------SEGMENTO DE CODIGO---------------------
 
 
 
+;----------------SEGMENTO DE CODIGO--------------------
 
 .code
+
+CrearHtml proc
+createFile input,handle
+OpenFile input,handle
+WriteFile handle,iniHtml,12
+
+;-------------- IMPRESIONES EN HTML ----------------------
+WriteFile handle,htmlh1o,4
+WriteFile handle,htmlrepo, 27
+WriteFile handle,htmlh1c,5
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlh2o,4
+WriteFile handle,htmlJugador1,18
+WriteFile handle,htmlSalto,5
+WriteFile handle,nombre1,5
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlPunteo1,18
+WriteFile handle,htmlSalto,5
+WriteFile handle,auxPunteo1,2
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlJugador2,18
+WriteFile handle,htmlSalto,5
+WriteFile handle,nombre2,5
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlPunteo2,18
+WriteFile handle,htmlSalto,5
+WriteFile handle,auxPunteo2,2
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlh2c,5
+WriteFile handle,htmlh1o,4
+WriteFile handle,htmlTablero,25
+WriteFile handle,htmlh1c,5
+;----------IMPRESION DE TABLERO
+
+WriteFile handle,htmlh2o,4
+WriteFile handle,tablero,9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[10],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[19],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[28],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[37],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[46],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[55],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[64],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,tablero[73],9
+WriteFile handle,htmlSalto,5
+WriteFile handle,htmlh2c,5
+;---------------------------------------------------------
+WriteFile handle,finHtml,14
+CloseFile handle
+CrearHtml endp
 InicializarTablero proc
                 mov tablero[0], 0 ; tablero[0] = 0
                 mov tablero[1], 32
@@ -220,7 +339,7 @@ InicializarTablero proc
                 mov tablero[9], 72
 
                 mov tablero[10], 49 ;NUMERO 1
-                mov tablero[11], 110
+                mov tablero[11], 78
                 mov tablero[12], 95
                 mov tablero[13], 110
                 mov tablero[14], 95
@@ -297,10 +416,17 @@ InicializarTablero proc
                 mov tablero[78], 95
                 mov tablero[79], 119
                 mov tablero[80], 95
-                mov tablero[81], 119
+                mov tablero[81], 87
                 mov tablero[82], 0
         ret
 InicializarTablero endp
+XOR_REG proc
+		xor ax, ax
+		xor bx, bx
+		xor cx, cx
+		xor dx, dx
+		ret
+XOR_REG endp
 main proc
         mov ax,@data    
         mov ds,ax
@@ -350,6 +476,10 @@ main proc
 
                 print msjRepo
 
+                obtenerTexto repo
+                ;print repo
+                AnalizarRepo repo
+
                 jmp Turno2
 
 
@@ -370,6 +500,10 @@ main proc
                 getChar ; lee un caracter del teclado y lo guarda en al
                 cmp al, 120 ; if (al == 120){va a brincar a la etiqueta salir}else{va a continuar con el programa}
                 je Menu
+
+                print msjRepo
+                obtenerTexto repo
+                AnalizarRepo repo
 
                 jmp Turno1
 
