@@ -325,6 +325,7 @@ WriteFile handle,htmlh2c,5
 ;---------------------------------------------------------
 WriteFile handle,finHtml,14
 CloseFile handle
+ret
 CrearHtml endp
 InicializarTablero proc
                 mov tablero[0], 0 ; tablero[0] = 0
